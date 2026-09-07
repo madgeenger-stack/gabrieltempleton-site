@@ -19,4 +19,18 @@
     if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); go(current() + 1); }
     if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp'   || e.key === 'PageUp')   { e.preventDefault(); go(current() - 1); }
   });
+
+  // Warm the next two spreads' plates as each one comes into view, so a page turn never lands on paper.
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        var i = spreads.indexOf(en.target);
+        for (var k = i + 1; k <= i + 2 && k < spreads.length; k++) {
+          spreads[k].querySelectorAll('img[loading="lazy"]').forEach(function (img) { img.loading = 'eager'; });
+        }
+      });
+    }, { rootMargin: '50% 0px' });
+    spreads.forEach(function (s) { io.observe(s); });
+  }
 })();
