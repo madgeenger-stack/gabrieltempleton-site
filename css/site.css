@@ -1,0 +1,41 @@
+/* Gabriel Templeton — shared type and color system.
+   Every page on gabrieltempleton.art loads this file first.
+   Faces are Google-hosted stand-ins wired as variables so a swap is one line. */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,400;0,500;1,400&family=Newsreader:ital,opsz,wght@0,6..72,400;1,6..72,400&family=Archivo:wght@400;500&display=swap');
+
+:root {
+  /* color */
+  --paper: #FAF9F7;        /* portfolio: near-white */
+  --ink: #1A1916;
+  --hairline: #D9D5CD;
+  --ink-quiet: #6B675F;    /* dates, colophon */
+
+  /* type */
+  --display: 'Cormorant', 'Cormorant Garamond', Georgia, serif;
+  --text: 'Newsreader', Georgia, serif;
+  --furniture: 'Archivo', system-ui, sans-serif;
+
+  /* rhythm */
+  --margin: clamp(20px, 4vw, 64px);   /* page margin around a plate */
+  --gutter: clamp(24px, 3vw, 56px);   /* the fold */
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { background: var(--paper); color: var(--ink); }
+body {
+  margin: 0;
+  font-family: var(--text);
+  font-size: 1.0625rem;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+img { display: block; max-width: 100%; height: auto; }
+a { color: inherit; text-decoration: none; }
+a:focus-visible { outline: 1.5px solid var(--ink); outline-offset: 4px; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
