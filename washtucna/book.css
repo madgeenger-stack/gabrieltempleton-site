@@ -29,15 +29,16 @@ html { scroll-snap-type: y proximity; }
   height: calc(100svh - 2 * var(--plate-inset));
 }
 .page img {
-  max-height: 100%;
-  max-width: 100%;
-  width: auto;
-  height: auto;
+  /* the page box owns the size; the plate sits inside it, aspect kept */
+  width: 100%;
+  height: 100%;
   object-fit: contain;
+  object-position: center;
 }
-/* left page holds the fold: image sits toward center; right page mirrors */
-.spread .page:first-child { justify-items: end; }
-.spread .page:last-child  { justify-items: start; }
+/* landscape plates hug the fold: left page toward the right edge, right page toward the left */
+.spread .page:first-child img { object-position: right center; }
+.spread .page:last-child img  { object-position: left center; }
+.spread--solo .page img { object-position: center; }
 
 /* solo plate + air: the blank page is real, so the plate keeps its half */
 .page--blank { }
@@ -54,8 +55,9 @@ html { scroll-snap-type: y proximity; }
 }
 .cover__plate { display: grid; place-items: center; min-height: 0; }
 .cover__img {
-  max-height: calc(100svh - 2 * var(--plate-inset) - 6rem);
-  width: auto;
+  width: 100%;
+  height: calc(100svh - 2 * var(--plate-inset) - 6rem);
+  object-fit: contain;
 }
 .cover__title {
   font-family: var(--display);
@@ -91,10 +93,10 @@ html { scroll-snap-type: y proximity; }
     padding: var(--plate-inset) var(--plate-inset) 0;
   }
   .page { height: auto; min-height: 0; }
+  .page img { width: 100%; height: auto; max-height: 88svh; object-position: center; }
   .page--blank { display: none; }
-  .spread .page:first-child, .spread .page:last-child { justify-items: center; }
-  .page img { max-height: 88svh; }
+  .spread .page:first-child img, .spread .page:last-child img { object-position: center; }
   .cover { min-height: 100svh; }
-  .cover__img { max-height: calc(100svh - 2 * var(--plate-inset) - 5rem); }
+  .cover__img { height: calc(100svh - 2 * var(--plate-inset) - 5rem); }
   .matter { min-height: 60svh; }
 }

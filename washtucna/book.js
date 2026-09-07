@@ -11,7 +11,8 @@
   }
   function go(i) {
     i = Math.max(0, Math.min(spreads.length - 1, i));
-    spreads[i].scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    // A page turn is a cut, not a slide: jump, don't animate.
+    window.scrollTo({ top: spreads[i].offsetTop, behavior: 'auto' });
   }
   document.addEventListener('keydown', function (e) {
     if (e.metaKey || e.ctrlKey || e.altKey) return;
