@@ -68,7 +68,8 @@ html { scroll-behavior: auto; }
   .stage--wide img { width: 100%; height: 100%; object-fit: contain; object-position: center; }
 
   .page--text { display: grid; align-content: start; justify-items: start; text-align: left; padding-top: 4%; }
-  #front, .matter--colophon { place-items: center; }
+  #front .page--text { align-content: center; justify-items: center; text-align: center; padding-top: 0; }
+  .matter--colophon { place-items: center; }
 }
 
 /* ---------- phone: linear column ---------- */
