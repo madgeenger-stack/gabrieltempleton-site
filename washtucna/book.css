@@ -1,102 +1,100 @@
 /* Pilgrimage to Washtucna — the book's own layout.
-   Shares type/color from /css/site.css; overrides the paper to a dust tone. */
+   Shares type/color from /css/site.css; overrides the paper to a dust tone.
+
+   The unit is the page. On tablet and desktop every spread is a stage of fixed
+   proportion — two pages of 4:3 with a gutter — sized to fit the viewport.
+   Plates hang from the head margin so the eye keeps one baseline from turn to
+   turn. Wides run across the fold. On a phone the book becomes a linear column. */
 
 :root {
-  --paper: #EDE8DE;            /* dust, not cream: the one warm gesture */
-  --plate-inset: var(--margin);
+  --paper: #EDE8DE;                 /* dust, not cream: the one warm gesture */
+  --stage-ratio: 2.08 / 0.75;       /* two 4:3 pages + a gutter of 8% of a page */
+  --folio-h: 2.5rem;
 }
 
-html { scroll-snap-type: y proximity; }
+html { scroll-behavior: auto; }
 .book { display: block; }
+.page img, .stage--wide img { cursor: zoom-in; }
 
-/* one spread = one screen */
-.spread, .cover, .matter {
-  min-height: 100svh;
-  scroll-snap-align: start;
-  display: grid;
-}
-
-/* facing pair: two pages, the fold between them */
-.spread {
-  grid-template-columns: 1fr 1fr;
-  column-gap: var(--gutter);
-  padding: var(--plate-inset);
-  align-items: center;
-}
-.page {
-  display: grid;
-  place-items: center;
-  height: calc(100svh - 2 * var(--plate-inset));
-}
-.page img {
-  /* the page box owns the size; the plate sits inside it, aspect kept */
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  object-position: center;
-}
-/* landscape plates hug the fold: left page toward the right edge, right page toward the left */
-.spread .page:first-child img { object-position: right center; }
-.spread .page:last-child img  { object-position: left center; }
-.spread--solo .page img { object-position: center; }
-
-/* solo plate + air: the blank page is real, so the plate keeps its half */
-.page--blank { }
-
-/* the vertical pair (porch / doorway) — let them stand a little taller */
-.spread--verticals { --plate-inset: clamp(20px, 3vw, 40px); }
-
-/* cover */
-.cover {
-  grid-template-rows: 1fr auto;
-  padding: var(--plate-inset);
-  row-gap: clamp(16px, 2.5vh, 32px);
-  min-height: 100svh;
-}
-.cover__plate { display: grid; place-items: center; min-height: 0; }
-.cover__img {
-  width: 100%;
-  height: calc(100svh - 2 * var(--plate-inset) - 6rem);
-  object-fit: contain;
-}
-.cover__title {
-  font-family: var(--display);
-  font-weight: 400;
-  font-size: clamp(1.75rem, 3.6vw, 3rem);
-  letter-spacing: 0.005em;
-  line-height: 1.1;
-  margin: 0;
-  text-align: center;
-}
-
-/* text-only pages: place/date, colophon */
-.matter {
-  place-items: center;
-  padding: var(--plate-inset);
-  text-align: center;
-}
-.matter p {
-  font-family: var(--text);
-  font-size: clamp(1.125rem, 1.6vw, 1.375rem);
-  margin: 0;
-  line-height: 1.7;
-}
+/* ---------- text pages ---------- */
+.matter p { font-family: var(--text); margin: 0; line-height: 1.7; font-size: clamp(1.125rem, 1.5vw, 1.375rem); }
 .matter .quiet { color: var(--ink-quiet); font-size: 0.9em; }
+.matter .day { font-family: var(--display); font-weight: 400; font-size: clamp(2.25rem, 4.5vw, 4rem); line-height: 1; letter-spacing: 0.005em; }
 
-/* phone: single column, one plate per screen, the blank page vanishes */
-@media (max-width: 760px) {
-  html { scroll-snap-type: none; }
-  .spread {
-    grid-template-columns: 1fr;
-    row-gap: var(--plate-inset);
-    min-height: 0;
-    padding: var(--plate-inset) var(--plate-inset) 0;
-  }
-  .page { height: auto; min-height: 0; }
-  .page img { width: 100%; height: auto; max-height: 88svh; object-position: center; }
-  .page--blank { display: none; }
-  .spread .page:first-child img, .spread .page:last-child img { object-position: center; }
-  .cover { min-height: 100svh; }
-  .cover__img { height: calc(100svh - 2 * var(--plate-inset) - 5rem); }
-  .matter { min-height: 60svh; }
+/* ---------- cover ---------- */
+.cover { position: relative; height: 100svh; overflow: hidden; }
+.cover__img { width: 100%; height: 100%; object-fit: cover; object-position: center; }
+.cover__title {
+  position: absolute; left: var(--margin); bottom: calc(var(--margin) * 0.9);
+  margin: 0; color: var(--paper);
+  font-family: var(--display); font-weight: 400;
+  font-size: clamp(1.9rem, 4.2vw, 3.6rem); line-height: 1.05; letter-spacing: 0.005em;
 }
+
+/* ---------- folio (page numbers) ---------- */
+.folio {
+  position: fixed; right: var(--margin); bottom: calc(var(--margin) * 0.6);
+  font-family: var(--furniture); font-size: 0.7rem; letter-spacing: 0.08em; color: var(--ink-quiet);
+  opacity: 0; transition: opacity 240ms; pointer-events: none;
+}
+.folio.is-on { opacity: 1; }
+
+/* ---------- tablet + desktop: discrete spreads ---------- */
+@media (min-width: 761px) {
+  html { scroll-snap-type: y mandatory; }
+  .book > section { height: 100svh; scroll-snap-align: start; scroll-snap-stop: always; }
+
+  .spread, .matter {
+    display: grid; place-items: center;
+    padding: var(--margin) var(--margin) calc(var(--margin) + var(--folio-h));
+    overflow: hidden;
+  }
+  .matter { text-align: center; }
+
+  .stage {
+    width: min(100%, calc((100svh - 2 * var(--margin) - var(--folio-h)) * (2.08 / 0.75)));
+    aspect-ratio: var(--stage-ratio);
+    display: grid; grid-template-columns: 1fr 1fr; column-gap: 3.846%;
+  }
+  .page { position: relative; height: 100%; min-width: 0; }
+  .page img { width: 100%; height: 100%; object-fit: contain; object-position: center top; }
+  .page:first-child img { object-position: right top; }   /* toward the fold */
+  .page:last-child  img { object-position: left top; }
+
+  .page--small { display: grid; place-items: center; }
+  .page--small img { width: 64%; height: 64%; object-position: center; }
+
+  .stage--wide { grid-template-columns: 1fr; }
+  .stage--wide img { width: 100%; height: 100%; object-fit: contain; object-position: center; }
+
+  .page--text { display: grid; align-content: start; justify-items: start; text-align: left; padding-top: 4%; }
+  #front, .matter--colophon { place-items: center; }
+}
+
+/* ---------- phone: linear column ---------- */
+@media (max-width: 760px) {
+  .spread { padding: var(--margin) var(--margin) 0; }
+  .stage { display: grid; row-gap: var(--margin); }
+  .page--blank { display: none; }
+  .page img, .stage--wide img { width: 100%; height: auto; max-height: 86svh; object-fit: contain; }
+  .page--small { display: grid; place-items: center; }
+  .page--small img { width: 72%; }
+  .matter { min-height: 55svh; display: grid; place-items: center; padding: var(--margin); text-align: center; }
+  .matter--day { min-height: 70svh; }
+  .cover__title { left: var(--margin); right: var(--margin); }
+  .folio { display: none; }
+}
+
+/* ---------- lightbox ---------- */
+.lightbox {
+  position: fixed; inset: 0; z-index: 10; background: var(--paper);
+  display: grid; place-items: center; padding: var(--margin);
+  cursor: zoom-out; touch-action: pan-y;
+}
+.lightbox[hidden] { display: none; }
+.lightbox img { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; }
+.lightbox__close {
+  position: absolute; top: calc(var(--margin) * 0.5); right: calc(var(--margin) * 0.5);
+  background: none; border: 0; color: var(--ink-quiet); font: 400 1.75rem/1 var(--display); cursor: pointer; padding: 0.25em 0.5em;
+}
+html.is-lightbox { overflow: hidden; }
