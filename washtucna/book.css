@@ -15,8 +15,8 @@
   --paper: #EDE8DE;                 /* dust, not cream: the one warm gesture */
   --stage-ratio: 2.08 / 0.75;       /* two 4:3 pages + a gutter of 8% of a page */
   --folio-h: 2.5rem;
-  --keyline: #F8F6F0;               /* print-white on dust paper */
-  --keyline-w: 0.32vmin;            /* ~3px on a desktop, ~2px on a phone */
+  --keyline: rgba(26, 25, 22, 0.4);    /* an ink hairline at the plate's edge: a rule, not a frame (was print-white; lost on the dust paper) */
+  --keyline-w: 1px;
   --fold-rule: rgba(26, 25, 22, 0.16);
 }
 
@@ -75,6 +75,8 @@ html { scroll-behavior: auto; }
   }
   /* poem pages run the full height; the width (and so the left/right edges) stays the plates' */
   .matter--poem .stage { height: calc(100svh - 2 * var(--margin) - var(--folio-h)); }
+  /* a plate on a poem spread stays plate-sized: capped at the plate page's height, not the taller text page */
+  .matter--poem .page img { max-height: var(--stage-h); }
 
   .page { position: relative; height: 100%; min-width: 0; min-height: 0; overflow: hidden; }
 
@@ -137,10 +139,10 @@ html { scroll-behavior: auto; }
 }
 html.is-lightbox { overflow: hidden; }
 
-/* ---------- frame treatment (decided 2026-09-24: C) — html[data-frame="a|b|c"] ----------
-   a: a thin print-white keyline on every plate.
-   b: the keyline, plus a straight hairline at the fold on facing spreads.
-   c: the keyline, plus a hand-drawn line at the fold — the book's default (set on <html>).
+/* ---------- frame treatment (decided 2026-09-24: C; keyline changed to ink 2026-09-24) — html[data-frame="a|b|c"] ----------
+   a: a 1px ink hairline (40%) on every plate.
+   b: the hairline, plus a straight hairline at the fold on facing spreads.
+   c: the hairline, plus a hand-drawn line at the fold — the book's default (set on <html>).
    The fold line runs the height of the photograph, not the page box (--plate-h is set by book.js).
    ?frame=a|b|c or F switch for comparison. Cover excluded. */
 html[data-frame="a"] .page img,
