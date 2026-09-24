@@ -93,7 +93,8 @@ html { scroll-behavior: auto; }
 
   /* text pages hang from the head like plates; the block hugs the fold, lines are left-aligned */
   .page--text { display: grid; align-content: start; justify-items: start; text-align: left; padding-top: 4%; }
-  .page--text:first-child { justify-items: end; }
+  /* a left-hand text page shrinks to its text and sits against the fold; the lines keep one left edge */
+  .page--text:first-child { justify-self: end; width: max-content; max-width: 100%; }
   #front .page--text { align-content: center; justify-items: center; text-align: center; padding-top: 0; }
   .matter--colophon { place-items: center; }
 }
