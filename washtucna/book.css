@@ -4,12 +4,20 @@
    The unit is the page. On tablet and desktop every spread is a stage of fixed
    proportion — two pages of 4:3 with a gutter — sized to fit the viewport.
    Plates hang from the head margin so the eye keeps one baseline from turn to
-   turn. Wides run across the fold. On a phone the book becomes a linear column. */
+   turn. Wides run across the fold. On a phone the book becomes a linear column.
+
+   v4 (2026-09-24): poem pages in the front matter (full viewport height at the
+   stage's width); plates shrink to their own aspect so a keyline can sit on the
+   photograph; lightbox sized from the viewport; frame prototypes A/B/C on
+   html[data-frame] — see the bottom of this file. */
 
 :root {
   --paper: #EDE8DE;                 /* dust, not cream: the one warm gesture */
   --stage-ratio: 2.08 / 0.75;       /* two 4:3 pages + a gutter of 8% of a page */
   --folio-h: 2.5rem;
+  --keyline: #F8F6F0;               /* print-white on dust paper */
+  --keyline-w: 0.32vmin;            /* ~3px on a desktop, ~2px on a phone */
+  --fold-rule: rgba(26, 25, 22, 0.16);
 }
 
 html { scroll-behavior: auto; }
@@ -20,6 +28,12 @@ html { scroll-behavior: auto; }
 .matter p { font-family: var(--text); margin: 0; line-height: 1.7; font-size: clamp(1.125rem, 1.5vw, 1.375rem); }
 .matter .quiet { color: var(--ink-quiet); font-size: 0.9em; }
 .matter .day { font-family: var(--display); font-weight: 400; font-size: clamp(2.25rem, 4.5vw, 4rem); line-height: 1; letter-spacing: 0.005em; }
+
+/* the poem: text, not display — Newsreader at reading size, hung from the head */
+.poem { text-align: left; }
+.poem p { font-size: clamp(0.95rem, 1.05vw, 1.125rem); line-height: 1.45; margin: 0 0 1em; }
+.poem p:last-child { margin-bottom: 0; }
+.poem .poem__title { font-family: var(--display); font-style: italic; font-weight: 400; font-size: clamp(1.5rem, 2.4vw, 2.25rem); line-height: 1.1; margin: 0 0 1.2em; }
 
 /* ---------- cover ---------- */
 .cover { position: relative; height: 100svh; overflow: hidden; }
@@ -54,22 +68,32 @@ html { scroll-behavior: auto; }
   .stage {
     /* both dimensions from the viewport: nothing inside can push the stage */
     --stage-h: min(calc(100svh - 2 * var(--margin) - var(--folio-h)), calc((100vw - 2 * var(--margin)) * 0.75 / 2.08));
+    position: relative;
     height: var(--stage-h);
     width: calc(var(--stage-h) * 2.08 / 0.75);
     display: grid; grid-template-columns: 1fr 1fr; column-gap: 3.846%;
   }
+  /* poem pages run the full height; the width (and so the left/right edges) stays the plates' */
+  .matter--poem .stage { height: calc(100svh - 2 * var(--margin) - var(--folio-h)); }
+
   .page { position: relative; height: 100%; min-width: 0; min-height: 0; overflow: hidden; }
-  .page img { width: 100%; height: 100%; object-fit: contain; object-position: center top; }
-  .page:first-child img { object-position: right top; }   /* toward the fold */
-  .page:last-child  img { object-position: left top; }
 
-  .page--small { display: grid; place-items: center; }
-  .page--small img { width: 64%; height: 64%; object-position: center; }
+  /* a plate is its own size: shrink the img to its aspect inside the page box,
+     hang it from the head, hug the fold. (was object-fit: contain on a full box) */
+  .page:not(.page--text) { display: flex; align-items: flex-start; }
+  .page:first-child { justify-content: flex-end; }   /* toward the fold */
+  .page:last-child  { justify-content: flex-start; }
+  .page img { width: auto; height: auto; max-width: 100%; max-height: 100%; object-fit: contain; }
 
-  .stage--wide { grid-template-columns: 1fr; }
-  .stage--wide img { width: 100%; height: 100%; object-fit: contain; object-position: center; }
+  .page--small { align-items: center; justify-content: center; }
+  .page--small img { max-width: 64%; max-height: 64%; }
 
+  .stage--wide { grid-template-columns: 1fr; place-items: center; }
+  .stage--wide img { width: auto; height: auto; max-width: 100%; max-height: 100%; object-fit: contain; }
+
+  /* text pages hang from the head like plates; the block hugs the fold, lines are left-aligned */
   .page--text { display: grid; align-content: start; justify-items: start; text-align: left; padding-top: 4%; }
+  .page--text:first-child { justify-items: end; }
   #front .page--text { align-content: center; justify-items: center; text-align: center; padding-top: 0; }
   .matter--colophon { place-items: center; }
 }
@@ -84,20 +108,57 @@ html { scroll-behavior: auto; }
   .page--small img { width: 72%; }
   .matter { min-height: 55svh; display: grid; place-items: center; padding: var(--margin); text-align: center; }
   .matter--day { min-height: 70svh; }
+  .matter--poem { min-height: 0; display: block; }
+  .matter--poem .stage { row-gap: calc(var(--margin) * 1.5); }
+  .matter--poem .page--text { text-align: left; }
   .cover__title { left: var(--margin); right: var(--margin); }
   .folio { display: none; }
 }
 
 /* ---------- lightbox ---------- */
+/* fit-to-screen: sized from the viewport, never from the container, so a tall
+   plate can't outgrow the screen. Native pinch-zoom is left on for touch. */
 .lightbox {
   position: fixed; inset: 0; z-index: 10; background: var(--paper);
   display: grid; place-items: center; padding: var(--margin);
-  cursor: zoom-out; touch-action: pan-y;
+  cursor: zoom-out; touch-action: pan-y pinch-zoom;
 }
 .lightbox[hidden] { display: none; }
-.lightbox img { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; }
+.lightbox img {
+  width: auto; height: auto;
+  max-width: calc(100vw - 2 * var(--margin));
+  max-height: calc(100svh - 2 * var(--margin));
+  object-fit: contain;
+}
 .lightbox__close {
   position: absolute; top: calc(var(--margin) * 0.5); right: calc(var(--margin) * 0.5);
   background: none; border: 0; color: var(--ink-quiet); font: 400 1.75rem/1 var(--display); cursor: pointer; padding: 0.25em 0.5em;
 }
 html.is-lightbox { overflow: hidden; }
+
+/* ---------- frame prototypes (2026-09-24) — html[data-frame="a|b|c"] ----------
+   a: a thin print-white keyline on every plate.
+   b: the keyline, plus a straight hairline at the fold on facing spreads.
+   c: the keyline, plus a hand-drawn line at the fold (Gabe's "rustic" binding).
+   Switch with ?frame=a|b|c in the URL, or press F to cycle. Cover excluded. */
+html[data-frame="a"] .page img,
+html[data-frame="b"] .page img,
+html[data-frame="c"] .page img,
+html[data-frame="a"] .stage--wide img,
+html[data-frame="b"] .stage--wide img,
+html[data-frame="c"] .stage--wide img { border: var(--keyline-w) solid var(--keyline); }
+
+@media (min-width: 761px) {
+  /* the fold, only where two plates face each other */
+  html[data-frame="b"] .spread .stage:not(.stage--wide):not(:has(.page--blank))::before,
+  html[data-frame="c"] .spread .stage:not(.stage--wide):not(:has(.page--blank))::before {
+    content: ""; position: absolute; top: 0; bottom: 0; left: 50%; pointer-events: none;
+  }
+  html[data-frame="b"] .spread .stage:not(.stage--wide):not(:has(.page--blank))::before {
+    width: 1px; margin-left: -0.5px; background: var(--fold-rule);
+  }
+  html[data-frame="c"] .spread .stage:not(.stage--wide):not(:has(.page--blank))::before {
+    width: 10px; margin-left: -5px; opacity: 0.55;
+    background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 1000' preserveAspectRatio='none'><path d='M5.1 0 C4.3 110 5.8 210 5 330 S4.2 520 5.3 640 S5.9 860 4.8 1000' fill='none' stroke='%231A1916' stroke-width='1.4' stroke-linecap='round' vector-effect='non-scaling-stroke'/></svg>") center / 100% 100% no-repeat;
+  }
+}

@@ -3,6 +3,24 @@
   var wide = matchMedia('(min-width: 761px)');
   var lightbox = document.getElementById('lightbox');
 
+  /* ---- frame prototypes (2026-09-24): ?frame=a|b|c, or F to cycle; remembered per browser ---- */
+  var modes = ['', 'a', 'b', 'c'];
+  function setFrame(m, remember) {
+    if (modes.indexOf(m) < 0) m = '';
+    if (m) document.documentElement.setAttribute('data-frame', m); else document.documentElement.removeAttribute('data-frame');
+    if (remember) { try { localStorage.setItem('washtucna-frame', m); } catch (e) {} }
+  }
+  var fromUrl = new URLSearchParams(location.search).get('frame');
+  if (fromUrl !== null) setFrame(fromUrl, true);
+  else { try { setFrame(localStorage.getItem('washtucna-frame') || '', false); } catch (e) {} }
+  document.addEventListener('keydown', function (e) {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.key === 'f' || e.key === 'F') {
+      var cur = document.documentElement.getAttribute('data-frame') || '';
+      setFrame(modes[(modes.indexOf(cur) + 1) % modes.length], true);
+    }
+  });
+
   /* ---- page turns (tablet/desktop) ---- */
   function current() {
     var y = window.scrollY + window.innerHeight / 2;
