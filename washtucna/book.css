@@ -137,11 +137,12 @@ html { scroll-behavior: auto; }
 }
 html.is-lightbox { overflow: hidden; }
 
-/* ---------- frame prototypes (2026-09-24) — html[data-frame="a|b|c"] ----------
+/* ---------- frame treatment (decided 2026-09-24: C) — html[data-frame="a|b|c"] ----------
    a: a thin print-white keyline on every plate.
    b: the keyline, plus a straight hairline at the fold on facing spreads.
-   c: the keyline, plus a hand-drawn line at the fold (Gabe's "rustic" binding).
-   Switch with ?frame=a|b|c in the URL, or press F to cycle. Cover excluded. */
+   c: the keyline, plus a hand-drawn line at the fold — the book's default (set on <html>).
+   The fold line runs the height of the photograph, not the page box (--plate-h is set by book.js).
+   ?frame=a|b|c or F switch for comparison. Cover excluded. */
 html[data-frame="a"] .page img,
 html[data-frame="b"] .page img,
 html[data-frame="c"] .page img,
@@ -153,7 +154,7 @@ html[data-frame="c"] .stage--wide img { border: var(--keyline-w) solid var(--key
   /* the fold, only where two plates face each other */
   html[data-frame="b"] .spread .stage:not(.stage--wide):not(:has(.page--blank))::before,
   html[data-frame="c"] .spread .stage:not(.stage--wide):not(:has(.page--blank))::before {
-    content: ""; position: absolute; top: 0; bottom: 0; left: 50%; pointer-events: none;
+    content: ""; position: absolute; top: 0; height: var(--plate-h, 100%); left: 50%; pointer-events: none;
   }
   html[data-frame="b"] .spread .stage:not(.stage--wide):not(:has(.page--blank))::before {
     width: 1px; margin-left: -0.5px; background: var(--fold-rule);

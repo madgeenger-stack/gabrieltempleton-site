@@ -3,23 +3,38 @@
   var wide = matchMedia('(min-width: 761px)');
   var lightbox = document.getElementById('lightbox');
 
-  /* ---- frame prototypes (2026-09-24): ?frame=a|b|c, or F to cycle; remembered per browser ---- */
+  /* ---- frame treatment: C (keyline + hand-drawn fold line) is the book's default, set in the markup.
+     ?frame=a|b|c or F still switch for comparison, for this page load only. ---- */
   var modes = ['', 'a', 'b', 'c'];
-  function setFrame(m, remember) {
+  function setFrame(m) {
     if (modes.indexOf(m) < 0) m = '';
     if (m) document.documentElement.setAttribute('data-frame', m); else document.documentElement.removeAttribute('data-frame');
-    if (remember) { try { localStorage.setItem('washtucna-frame', m); } catch (e) {} }
   }
   var fromUrl = new URLSearchParams(location.search).get('frame');
-  if (fromUrl !== null) setFrame(fromUrl, true);
-  else { try { setFrame(localStorage.getItem('washtucna-frame') || '', false); } catch (e) {} }
+  if (fromUrl !== null) setFrame(fromUrl);
   document.addEventListener('keydown', function (e) {
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     if (e.key === 'f' || e.key === 'F') {
       var cur = document.documentElement.getAttribute('data-frame') || '';
-      setFrame(modes[(modes.indexOf(cur) + 1) % modes.length], true);
+      setFrame(modes[(modes.indexOf(cur) + 1) % modes.length]);
     }
   });
+
+  /* the fold line is sized to the photograph, not the page box: measure the plate on each facing spread */
+  var facing = spreads.filter(function (s) {
+    var st = s.querySelector('.stage');
+    return s.classList.contains('spread') && st && !st.classList.contains('stage--wide') && !st.querySelector('.page--blank');
+  });
+  function sizeFold() {
+    facing.forEach(function (s) {
+      var st = s.querySelector('.stage'), img = st.querySelector('.page img');
+      if (img && img.clientHeight) st.style.setProperty('--plate-h', img.clientHeight + 'px');
+    });
+  }
+  window.addEventListener('resize', sizeFold);
+  window.addEventListener('load', sizeFold);
+  facing.forEach(function (s) { var img = s.querySelector('.page img'); if (img) img.addEventListener('load', sizeFold); });
+  sizeFold();
 
   /* ---- page turns (tablet/desktop) ---- */
   function current() {
